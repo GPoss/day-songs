@@ -1076,7 +1076,7 @@ async function openInPlaylist() {
   btn.disabled = false;
 }
 
-
+function assignSong(songObj) {
   if (!selectedDay) return;
   const { year, month, day } = selectedDay;
   const songs = getSongs(year);
