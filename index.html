@@ -1,0 +1,1082 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Day Songs — A Song for Every Day</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #13131a;
+    --surface2: #1c1c27;
+    --border: #2a2a3a;
+    --accent: #1DB954;
+    --accent2: #ff6b6b;
+    --text: #e8e8f0;
+    --text-muted: #7a7a90;
+    --gold: #f4c76a;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Background grid */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: 
+      linear-gradient(rgba(29,185,84,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(29,185,84,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .app { position: relative; z-index: 1; }
+
+  /* ── Header ── */
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 24px 40px;
+    border-bottom: 1px solid var(--border);
+    background: rgba(10,10,15,0.8);
+    backdrop-filter: blur(12px);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.6rem;
+    font-style: italic;
+    letter-spacing: -0.02em;
+    background: linear-gradient(135deg, var(--accent), var(--gold));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .logo span {
+    font-style: normal;
+    font-weight: 700;
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    display: block;
+    -webkit-text-fill-color: var(--text-muted);
+    margin-top: -4px;
+  }
+
+  .user-area {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+  }
+
+  .user-area img {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    border: 2px solid var(--accent);
+  }
+
+  /* ── Login Screen ── */
+  #login-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: calc(100vh - 89px);
+    text-align: center;
+    padding: 40px;
+  }
+
+  .login-art {
+    width: 160px; height: 160px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 40% 40%, rgba(29,185,84,0.3), rgba(244,199,106,0.1), transparent 70%);
+    border: 1px solid rgba(29,185,84,0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 4rem;
+    margin-bottom: 40px;
+    animation: pulse 3s ease-in-out infinite;
+    position: relative;
+  }
+
+  .login-art::after {
+    content: '';
+    position: absolute;
+    inset: -20px;
+    border-radius: 50%;
+    border: 1px solid rgba(29,185,84,0.1);
+    animation: pulse 3s ease-in-out infinite reverse;
+  }
+
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.05); opacity: 0.8; }
+  }
+
+  #login-screen h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 3rem;
+    font-style: italic;
+    margin-bottom: 16px;
+    line-height: 1.1;
+  }
+
+  #login-screen p {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    max-width: 400px;
+    line-height: 1.7;
+    margin-bottom: 40px;
+  }
+
+  .btn-spotify {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--accent);
+    color: #000;
+    border: none;
+    padding: 14px 32px;
+    border-radius: 40px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.85rem;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-spotify:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px rgba(29,185,84,0.4);
+  }
+
+  .btn-spotify svg { width: 20px; height: 20px; }
+
+  /* ── Main App ── */
+  #main-app { display: none; padding: 40px; max-width: 1400px; margin: 0 auto; }
+
+  .app-grid {
+    display: grid;
+    grid-template-columns: 1fr 380px;
+    gap: 32px;
+    align-items: start;
+  }
+
+  /* ── Calendar ── */
+  .calendar-section {}
+
+  .calendar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 28px;
+  }
+
+  .month-nav {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .month-nav h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    font-weight: 400;
+    letter-spacing: -0.02em;
+    min-width: 240px;
+  }
+
+  .nav-btn {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+    font-size: 1.1rem;
+  }
+
+  .nav-btn:hover {
+    background: var(--accent);
+    color: #000;
+    border-color: var(--accent);
+  }
+
+  .year-select {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.85rem;
+    cursor: pointer;
+    outline: none;
+  }
+
+  .weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+    margin-bottom: 8px;
+  }
+
+  .weekday {
+    text-align: center;
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
+    color: var(--text-muted);
+    padding: 8px 0;
+  }
+
+  .calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+  }
+
+  .cal-day {
+    aspect-ratio: 1;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.15s;
+    position: relative;
+    overflow: hidden;
+    padding: 4px;
+  }
+
+  .cal-day:hover:not(.empty):not(.today) {
+    border-color: var(--accent);
+    background: rgba(29,185,84,0.08);
+    transform: scale(1.05);
+    z-index: 2;
+  }
+
+  .cal-day.empty {
+    background: transparent;
+    border-color: transparent;
+    cursor: default;
+  }
+
+  .cal-day.today {
+    border-color: var(--gold);
+    background: rgba(244,199,106,0.08);
+  }
+
+  .cal-day.today .day-num {
+    color: var(--gold);
+    font-weight: 500;
+  }
+
+  .cal-day.has-song {
+    border-color: rgba(29,185,84,0.5);
+  }
+
+  .cal-day.has-song::after {
+    content: '';
+    position: absolute;
+    bottom: 4px;
+    width: 4px; height: 4px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+
+  .cal-day.selected {
+    border-color: var(--accent);
+    background: rgba(29,185,84,0.15);
+    box-shadow: 0 0 20px rgba(29,185,84,0.2);
+  }
+
+  .day-num {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    transition: color 0.15s;
+  }
+
+  .cal-day:hover:not(.empty) .day-num { color: var(--text); }
+
+  .song-thumb {
+    width: 28px; height: 28px;
+    border-radius: 4px;
+    object-fit: cover;
+    margin-bottom: 3px;
+  }
+
+  /* ── Sidebar ── */
+  .sidebar {
+    position: sticky;
+    top: 109px;
+  }
+
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+  }
+
+  .panel-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .panel-title {
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+  }
+
+  .selected-date-display {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.2rem;
+    font-style: italic;
+    color: var(--gold);
+  }
+
+  .panel-body { padding: 24px; }
+
+  /* Current song for day */
+  .current-song {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px;
+    background: var(--surface2);
+    border-radius: 12px;
+    margin-bottom: 20px;
+    border: 1px solid var(--border);
+  }
+
+  .current-song img {
+    width: 56px; height: 56px;
+    border-radius: 8px;
+    flex-shrink: 0;
+  }
+
+  .current-song-info { flex: 1; min-width: 0; }
+  .current-song-info .track { font-size: 0.85rem; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .current-song-info .artist { font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; }
+
+  .btn-remove {
+    background: none;
+    border: 1px solid rgba(255,107,107,0.3);
+    color: var(--accent2);
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 0.7rem;
+    cursor: pointer;
+    font-family: 'DM Mono', monospace;
+    transition: all 0.15s;
+  }
+
+  .btn-remove:hover { background: rgba(255,107,107,0.1); }
+
+  /* Search */
+  .search-label {
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+    display: block;
+  }
+
+  .search-wrap {
+    position: relative;
+    margin-bottom: 16px;
+  }
+
+  .search-input {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 12px 16px 12px 40px;
+    border-radius: 10px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.82rem;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  .search-input:focus { border-color: var(--accent); }
+  .search-input::placeholder { color: var(--text-muted); }
+
+  .search-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    font-size: 0.9rem;
+  }
+
+  .search-results {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-height: 300px;
+    overflow-y: auto;
+  }
+
+  .search-results::-webkit-scrollbar { width: 4px; }
+  .search-results::-webkit-scrollbar-track { background: transparent; }
+  .search-results::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  .result-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.12s;
+    border: 1px solid transparent;
+  }
+
+  .result-item:hover {
+    background: var(--surface2);
+    border-color: var(--border);
+  }
+
+  .result-item img {
+    width: 40px; height: 40px;
+    border-radius: 6px;
+    flex-shrink: 0;
+  }
+
+  .result-info { flex: 1; min-width: 0; }
+  .result-info .track { font-size: 0.8rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .result-info .artist { font-size: 0.7rem; color: var(--text-muted); }
+
+  .btn-add {
+    background: var(--accent);
+    color: #000;
+    border: none;
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    font-size: 1.1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: transform 0.15s;
+  }
+
+  .btn-add:hover { transform: scale(1.15); }
+
+  .empty-state {
+    text-align: center;
+    padding: 32px 0;
+    color: var(--text-muted);
+    font-size: 0.78rem;
+    line-height: 1.8;
+  }
+
+  .empty-state .icon { font-size: 2rem; margin-bottom: 12px; }
+
+  /* ── Stats strip ── */
+  .stats-strip {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+  }
+
+  .stat-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--accent);
+    display: block;
+  }
+
+  .stat-label {
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    margin-top: 4px;
+  }
+
+  /* Loading spinner */
+  .spinner {
+    display: inline-block;
+    width: 16px; height: 16px;
+    border: 2px solid rgba(29,185,84,0.2);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Toast */
+  #toast {
+    position: fixed;
+    bottom: 32px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    padding: 12px 24px;
+    border-radius: 40px;
+    font-size: 0.78rem;
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    z-index: 1000;
+    white-space: nowrap;
+  }
+  #toast.show { transform: translateX(-50%) translateY(0); }
+  #toast.success { border-color: var(--accent); color: var(--accent); }
+  #toast.error { border-color: var(--accent2); color: var(--accent2); }
+
+  /* ── Responsive ── */
+  @media (max-width: 900px) {
+    .app-grid { grid-template-columns: 1fr; }
+    .sidebar { position: static; }
+    header { padding: 16px 20px; }
+    #main-app { padding: 20px; }
+  }
+
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <header>
+    <div class="logo">
+      Day Songs
+      <span>365 Days of Music</span>
+    </div>
+    <div class="user-area" id="user-area"></div>
+  </header>
+
+  <!-- Login -->
+  <div id="login-screen">
+    <div class="login-art">♪</div>
+    <h1>A song for<br>every day.</h1>
+    <p>Assign a Spotify track to each day of the year.<br>Build your personal 365-song soundtrack for life.</p>
+    <button class="btn-spotify" onclick="login()">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg>
+      Connect with Spotify
+    </button>
+  </div>
+
+  <!-- Main App -->
+  <div id="main-app">
+    <div class="stats-strip">
+      <div class="stat-card">
+        <span class="stat-num" id="stat-filled">0</span>
+        <div class="stat-label">Days Filled</div>
+      </div>
+      <div class="stat-card">
+        <span class="stat-num" id="stat-remaining">365</span>
+        <div class="stat-label">Days Remaining</div>
+      </div>
+      <div class="stat-card">
+        <span class="stat-num" id="stat-streak">0</span>
+        <div class="stat-label">Day Streak</div>
+      </div>
+    </div>
+
+    <div class="app-grid">
+      <div class="calendar-section">
+        <div class="calendar-header">
+          <div class="month-nav">
+            <button class="nav-btn" onclick="changeMonth(-1)">‹</button>
+            <h2 id="month-label"></h2>
+            <button class="nav-btn" onclick="changeMonth(1)">›</button>
+          </div>
+          <select class="year-select" id="year-select" onchange="changeYear(this.value)"></select>
+        </div>
+        <div class="weekdays">
+          <div class="weekday">SUN</div><div class="weekday">MON</div>
+          <div class="weekday">TUE</div><div class="weekday">WED</div>
+          <div class="weekday">THU</div><div class="weekday">FRI</div>
+          <div class="weekday">SAT</div>
+        </div>
+        <div class="calendar-grid" id="calendar-grid"></div>
+      </div>
+
+      <div class="sidebar">
+        <div class="panel">
+          <div class="panel-header">
+            <span class="panel-title">Selected Day</span>
+            <span class="selected-date-display" id="selected-date-display">—</span>
+          </div>
+          <div class="panel-body">
+            <div id="current-song-area"></div>
+            <div id="search-area">
+              <label class="search-label">SEARCH SPOTIFY</label>
+              <div class="search-wrap">
+                <span class="search-icon">♫</span>
+                <input type="text" class="search-input" id="search-input"
+                  placeholder="Song, artist, or album…"
+                  oninput="debounceSearch(this.value)"
+                  autocomplete="off">
+              </div>
+              <div class="search-results" id="search-results">
+                <div class="empty-state">
+                  <div class="icon">📅</div>
+                  Select a day on the calendar,<br>then search for a song to assign.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════
+//  CONFIG
+// ═══════════════════════════════════════════════
+const CLIENT_ID = 'dd8d4946737444cbbe655e15fdd2c683';
+const REDIRECT_URI = 'https://GPOSS.github.io/day-songs/';
+const SCOPES = 'user-read-private user-read-email';
+
+// ═══════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════
+let accessToken = null;
+let userProfile = null;
+let selectedDay = null; // { year, month, day } 1-indexed
+let currentYear = new Date().getFullYear();
+let currentMonth = new Date().getMonth(); // 0-indexed
+
+// Storage key: "songs_YEAR" → { "MM-DD": { id, name, artists, albumArt, uri } }
+function storageKey(year) { return `day_songs_${year}`; }
+function getSongs(year) {
+  try { return JSON.parse(localStorage.getItem(storageKey(year))) || {}; }
+  catch { return {}; }
+}
+function saveSongs(year, data) {
+  localStorage.setItem(storageKey(year), JSON.stringify(data));
+}
+function dayKey(month, day) {
+  return `${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+}
+
+// ═══════════════════════════════════════════════
+//  AUTH — PKCE
+// ═══════════════════════════════════════════════
+async function generateCodeVerifier() {
+  const array = new Uint8Array(64);
+  crypto.getRandomValues(array);
+  return btoa(String.fromCharCode(...array)).replace(/[^a-zA-Z0-9]/g, '').substring(0, 64);
+}
+
+async function generateCodeChallenge(verifier) {
+  const data = new TextEncoder().encode(verifier);
+  const digest = await crypto.subtle.digest('SHA-256', data);
+  return btoa(String.fromCharCode(...new Uint8Array(digest)))
+    .replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+}
+
+async function login() {
+  const verifier = await generateCodeVerifier();
+  const challenge = await generateCodeChallenge(verifier);
+  sessionStorage.setItem('pkce_verifier', verifier);
+
+  const params = new URLSearchParams({
+    client_id: CLIENT_ID,
+    response_type: 'code',
+    redirect_uri: REDIRECT_URI,
+    scope: SCOPES,
+    code_challenge_method: 'S256',
+    code_challenge: challenge,
+  });
+
+  window.location.href = `https://accounts.spotify.com/authorize?${params}`;
+}
+
+async function exchangeToken(code) {
+  const verifier = sessionStorage.getItem('pkce_verifier');
+  if (!verifier) { showToast('Auth error: no verifier', 'error'); return; }
+
+  const body = new URLSearchParams({
+    grant_type: 'authorization_code',
+    code,
+    redirect_uri: REDIRECT_URI,
+    client_id: CLIENT_ID,
+    code_verifier: verifier,
+  });
+
+  const res = await fetch('https://accounts.spotify.com/api/token', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body,
+  });
+
+  if (!res.ok) { showToast('Token exchange failed', 'error'); return; }
+  const data = await res.json();
+  accessToken = data.access_token;
+  
+  // Store token with expiry
+  const expiresAt = Date.now() + data.expires_in * 1000;
+  localStorage.setItem('spotify_token', JSON.stringify({ token: accessToken, expiresAt }));
+
+  // Clean URL (remove ?code=... from address bar)
+  window.history.replaceState({}, document.title, window.location.pathname);
+
+  await fetchUserProfile();
+  showApp();
+}
+
+function getStoredToken() {
+  try {
+    const raw = localStorage.getItem('spotify_token');
+    if (!raw) return null;
+    const { token, expiresAt } = JSON.parse(raw);
+    if (Date.now() > expiresAt - 60000) { // expired or about to expire
+      localStorage.removeItem('spotify_token');
+      return null;
+    }
+    return token;
+  } catch { return null; }
+}
+
+// ═══════════════════════════════════════════════
+//  SPOTIFY API
+// ═══════════════════════════════════════════════
+async function spotifyFetch(url) {
+  const res = await fetch(url, {
+    headers: { Authorization: `Bearer ${accessToken}` }
+  });
+  if (res.status === 401) {
+    accessToken = null;
+    localStorage.removeItem('spotify_token');
+    showToast('Session expired – please reconnect', 'error');
+    document.getElementById('login-screen').style.display = 'flex';
+    document.getElementById('main-app').style.display = 'none';
+    return null;
+  }
+  return res.json();
+}
+
+async function fetchUserProfile() {
+  const data = await spotifyFetch('https://api.spotify.com/v1/me');
+  if (!data) return;
+  userProfile = data;
+  const area = document.getElementById('user-area');
+  area.innerHTML = `
+    ${data.images?.[0]?.url ? `<img src="${data.images[0].url}" alt="">` : ''}
+    <span>${data.display_name || data.id}</span>
+    <button onclick="logout()" style="background:none;border:1px solid var(--border);color:var(--text-muted);padding:5px 12px;border-radius:20px;font-size:0.7rem;cursor:pointer;font-family:inherit;">Sign Out</button>
+  `;
+}
+
+let searchDebounce = null;
+function debounceSearch(q) {
+  clearTimeout(searchDebounce);
+  if (!selectedDay) {
+    showToast('Select a day first!', 'error');
+    return;
+  }
+  if (q.length < 2) {
+    document.getElementById('search-results').innerHTML = '<div class="empty-state"><div class="icon">🔍</div>Type to search songs…</div>';
+    return;
+  }
+  searchDebounce = setTimeout(() => searchTracks(q), 400);
+}
+
+async function searchTracks(q) {
+  const results = document.getElementById('search-results');
+  results.innerHTML = '<div class="empty-state"><span class="spinner"></span></div>';
+
+  const data = await spotifyFetch(`https://api.spotify.com/v1/search?q=${encodeURIComponent(q)}&type=track&limit=8`);
+  if (!data) return;
+
+  const tracks = data.tracks?.items || [];
+  if (!tracks.length) {
+    results.innerHTML = '<div class="empty-state">No tracks found.</div>';
+    return;
+  }
+
+  results.innerHTML = tracks.map(t => `
+    <div class="result-item">
+      <img src="${t.album.images?.[2]?.url || t.album.images?.[0]?.url || ''}" alt="" onerror="this.style.display='none'">
+      <div class="result-info">
+        <div class="track">${t.name}</div>
+        <div class="artist">${t.artists.map(a=>a.name).join(', ')}</div>
+      </div>
+      <button class="btn-add" onclick="assignSong(${JSON.stringify({
+        id: t.id,
+        name: t.name,
+        artists: t.artists.map(a=>a.name).join(', '),
+        albumArt: t.album.images?.[2]?.url || t.album.images?.[0]?.url || '',
+        uri: t.uri,
+        previewUrl: t.preview_url
+      }).replace(/"/g, '&quot;')})">+</button>
+    </div>
+  `).join('');
+}
+
+// ═══════════════════════════════════════════════
+//  ASSIGN / REMOVE
+// ═══════════════════════════════════════════════
+function assignSong(songObj) {
+  if (!selectedDay) return;
+  const { year, month, day } = selectedDay;
+  const songs = getSongs(year);
+  songs[dayKey(month, day)] = songObj;
+  saveSongs(year, songs);
+  renderCalendar();
+  renderSidebar();
+  updateStats();
+  showToast(`♫ ${songObj.name} saved!`, 'success');
+}
+
+function removeSong() {
+  if (!selectedDay) return;
+  const { year, month, day } = selectedDay;
+  const songs = getSongs(year);
+  delete songs[dayKey(month, day)];
+  saveSongs(year, songs);
+  renderCalendar();
+  renderSidebar();
+  updateStats();
+  showToast('Song removed', '');
+}
+
+// ═══════════════════════════════════════════════
+//  CALENDAR
+// ═══════════════════════════════════════════════
+const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+function renderCalendar() {
+  document.getElementById('month-label').textContent = `${MONTHS[currentMonth]} ${currentYear}`;
+  
+  const grid = document.getElementById('calendar-grid');
+  grid.innerHTML = '';
+  
+  const songs = getSongs(currentYear);
+  const today = new Date();
+  const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+  const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+
+  // Empty cells
+  for (let i = 0; i < firstDay; i++) {
+    const el = document.createElement('div');
+    el.className = 'cal-day empty';
+    grid.appendChild(el);
+  }
+
+  for (let d = 1; d <= daysInMonth; d++) {
+    const key = dayKey(currentMonth, d);
+    const song = songs[key];
+    const isToday = today.getFullYear() === currentYear && today.getMonth() === currentMonth && today.getDate() === d;
+    const isSelected = selectedDay && selectedDay.year === currentYear && selectedDay.month === currentMonth && selectedDay.day === d;
+
+    const el = document.createElement('div');
+    el.className = `cal-day${isToday ? ' today' : ''}${song ? ' has-song' : ''}${isSelected ? ' selected' : ''}`;
+    
+    if (song && song.albumArt) {
+      el.innerHTML = `<img class="song-thumb" src="${song.albumArt}" alt="" onerror="this.style.display='none'"><div class="day-num">${d}</div>`;
+    } else {
+      el.innerHTML = `<div class="day-num">${d}</div>`;
+    }
+
+    el.onclick = () => selectDay(currentYear, currentMonth, d);
+    grid.appendChild(el);
+  }
+}
+
+function selectDay(year, month, day) {
+  selectedDay = { year, month, day };
+  renderCalendar();
+  renderSidebar();
+  document.getElementById('selected-date-display').textContent = 
+    `${MONTHS[month].slice(0,3)} ${day}, ${year}`;
+  document.getElementById('search-input').value = '';
+  document.getElementById('search-results').innerHTML = '<div class="empty-state"><div class="icon">🔍</div>Search for a song to assign to this day.</div>';
+}
+
+function renderSidebar() {
+  if (!selectedDay) return;
+  const { year, month, day } = selectedDay;
+  const songs = getSongs(year);
+  const song = songs[dayKey(month, day)];
+  const area = document.getElementById('current-song-area');
+
+  if (song) {
+    area.innerHTML = `
+      <div class="current-song">
+        ${song.albumArt ? `<img src="${song.albumArt}" alt="">` : ''}
+        <div class="current-song-info">
+          <div class="track">${song.name}</div>
+          <div class="artist">${song.artists}</div>
+        </div>
+        <button class="btn-remove" onclick="removeSong()">Remove</button>
+      </div>
+    `;
+  } else {
+    area.innerHTML = '';
+  }
+}
+
+function changeMonth(dir) {
+  currentMonth += dir;
+  if (currentMonth > 11) { currentMonth = 0; currentYear++; }
+  if (currentMonth < 0) { currentMonth = 11; currentYear--; }
+  updateYearSelect();
+  renderCalendar();
+  updateStats();
+}
+
+function changeYear(y) {
+  currentYear = parseInt(y);
+  renderCalendar();
+  updateStats();
+}
+
+function updateYearSelect() {
+  document.getElementById('year-select').value = currentYear;
+}
+
+function buildYearSelect() {
+  const sel = document.getElementById('year-select');
+  const thisYear = new Date().getFullYear();
+  for (let y = thisYear - 5; y <= thisYear + 5; y++) {
+    const opt = document.createElement('option');
+    opt.value = y; opt.textContent = y;
+    if (y === currentYear) opt.selected = true;
+    sel.appendChild(opt);
+  }
+}
+
+// ═══════════════════════════════════════════════
+//  STATS
+// ═══════════════════════════════════════════════
+function updateStats() {
+  const songs = getSongs(currentYear);
+  const filled = Object.keys(songs).length;
+  const total = isLeapYear(currentYear) ? 366 : 365;
+
+  document.getElementById('stat-filled').textContent = filled;
+  document.getElementById('stat-remaining').textContent = total - filled;
+
+  // Streak from today back
+  let streak = 0;
+  const d = new Date();
+  while (true) {
+    const key = dayKey(d.getMonth(), d.getDate());
+    if (songs[key]) { streak++; d.setDate(d.getDate() - 1); }
+    else break;
+    if (streak > 365) break;
+  }
+  document.getElementById('stat-streak').textContent = streak;
+}
+
+function isLeapYear(y) { return y % 4 === 0 && (y % 100 !== 0 || y % 400 === 0); }
+
+// ═══════════════════════════════════════════════
+//  UI
+// ═══════════════════════════════════════════════
+function showApp() {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('main-app').style.display = 'block';
+  buildYearSelect();
+  renderCalendar();
+  updateStats();
+}
+
+function logout() {
+  accessToken = null;
+  userProfile = null;
+  localStorage.removeItem('spotify_token');
+  document.getElementById('user-area').innerHTML = '';
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('main-app').style.display = 'none';
+}
+
+let toastTimer = null;
+function showToast(msg, type = '') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = `show ${type}`;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { el.className = ''; }, 2500);
+}
+
+// ═══════════════════════════════════════════════
+//  BOOT
+// ═══════════════════════════════════════════════
+async function init() {
+  // Check for OAuth callback code
+  const params = new URLSearchParams(window.location.search);
+  const code = params.get('code');
+  const error = params.get('error');
+
+  if (error) {
+    showToast('Spotify login cancelled', 'error');
+    return;
+  }
+
+  if (code) {
+    await exchangeToken(code);
+    return;
+  }
+
+  // Check stored token
+  const stored = getStoredToken();
+  if (stored) {
+    accessToken = stored;
+    await fetchUserProfile();
+    showApp();
+    return;
+  }
+
+  // Show login
+  document.getElementById('login-screen').style.display = 'flex';
+}
+
+init();
+</script>
+</body>
+</html>
