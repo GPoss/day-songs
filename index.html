@@ -819,25 +819,32 @@ async function generateCodeChallenge(verifier) {
 }
 
 async function login() {
-  const verifier = await generateCodeVerifier();
-  const challenge = await generateCodeChallenge(verifier);
-  sessionStorage.setItem('pkce_verifier', verifier);
+  try {
+    const verifier = await generateCodeVerifier();
+    const challenge = await generateCodeChallenge(verifier);
+    // Use localStorage instead of sessionStorage — survives the redirect
+    localStorage.setItem('pkce_verifier', verifier);
 
-  const params = new URLSearchParams({
-    client_id: CLIENT_ID,
-    response_type: 'code',
-    redirect_uri: REDIRECT_URI,
-    scope: SCOPES,
-    code_challenge_method: 'S256',
-    code_challenge: challenge,
-  });
+    const params = new URLSearchParams({
+      client_id: CLIENT_ID,
+      response_type: 'code',
+      redirect_uri: REDIRECT_URI,
+      scope: SCOPES,
+      code_challenge_method: 'S256',
+      code_challenge: challenge,
+      show_dialog: 'true',
+    });
 
-  window.location.href = `https://accounts.spotify.com/authorize?${params}`;
+    window.location.href = `https://accounts.spotify.com/authorize?${params}`;
+  } catch (err) {
+    console.error('Login error:', err);
+    showToast('Login failed: ' + err.message, 'error');
+  }
 }
 
 async function exchangeToken(code) {
-  const verifier = sessionStorage.getItem('pkce_verifier');
-  if (!verifier) { showToast('Auth error: no verifier', 'error'); return; }
+  const verifier = localStorage.getItem('pkce_verifier');
+  if (!verifier) { showToast('Auth error: no verifier — please try connecting again', 'error'); return; }
 
   const body = new URLSearchParams({
     grant_type: 'authorization_code',
@@ -856,6 +863,7 @@ async function exchangeToken(code) {
   if (!res.ok) { showToast('Token exchange failed', 'error'); return; }
   const data = await res.json();
   accessToken = data.access_token;
+  localStorage.removeItem('pkce_verifier'); // clean up after use
   
   // Store token with expiry
   const expiresAt = Date.now() + data.expires_in * 1000;
